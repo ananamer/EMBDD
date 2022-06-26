@@ -14,8 +14,23 @@ extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart2;
 
 //int notes[] = {262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494};
-int notes[] = {294, 330, 349,    294, 330, 349,     294, 330, 349, 330, 294, 330, 294, 262};
-int time[] =  {2,4,8, 8,2,8 ,2,2,4,2,2,1,4,2} ;
+int notes[] = {294, 330, 294, 330, 349,  0,  294, 330, 294, 330, 349,    0,       294, 330, 294, 330, 349,      330, 294, 330, 294, 262 ,0};
+int time[] =  {4,4,4,4,2,                 2,  4,4,4,4,2,                  2,       4,4,4,4,2        ,2,2,4,4,2, 2} ;
+
+
+//int notes [] = { mi , la , do , si, la la , so#,    mi, fa , fa, so , la, mi
+
+
+//{ 262,   277, 294, 311,   330,  349, 370,   392,   415, 440,  466,  494}
+//  Do,   Do#, Re,   R#,    Mi,   Fa,   F#,   Sol,  Sol#, La,   La#,  Si
+
+//int notes[] = { 0,   330, 440, 262, 494, 440, 440, 415, 0,  330, 349, 349, 392, 440, 330 } ;
+//int time [] = { 2,   2,1, 3,3,3,2,4                     ,3 ,4,2,2,2,4,2};
+		//int notes[] = { 494,494,0  ,466,466,0  ,415,494,415,494,415,494,415,0 };
+//int time[] =  { 4,4  ,4    ,4,4     ,4   ,2,1,1,1,1,4,8 ,4          } ;
+//int notes[] = { 294,392, 440, 466, 392 ,0};
+//int time [] = { 2   ,4   ,4   ,2   ,2  ,2};
+size_t size = sizeof(notes)/sizeof(notes[0]);
 
 static int i=0;
 void buzInit(BUZ* buz)
@@ -25,56 +40,33 @@ void buzInit(BUZ* buz)
 	buz->maxCounter = 500;
 }
 
-//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
-//{
-//	if(tim == &htim6){
-//		noteChange(i);
-//		i++;
-//		if (i >= 12) {
-//			i = 0;
-//		}
-//	}
-//}
-
 void noteChange(int i)
 {
-
 	__HAL_TIM_SET_COUNTER(&htim3, 0);
 	__HAL_TIM_SET_AUTORELOAD(&htim3, 100000/notes[i]);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1,100000/time[i]/256);
-
+	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1,100000/notes[i]/2);
 }
-
 
 void buzzerStart(BUZ* buz)
 {
 	buz->state = BUZ_ON;
-//	noteChange(0);
 }
 
 void buzOnTimerInterrupt(BUZ* buz)
 {
 	if(buz->state == BUZ_ON) {
 		buz->counter ++;
-
 		if (buz->counter >= buz->maxCounter){
 			buz->counter = 0;
 			noteChange(i);
+			buz->maxCounter = 1000 / time[i];
 			i++;
-			if (i >= 14) {
+			if (i >= size) {
 				i = 0;
 			}
 		}
 	}
-
 }
 
-//if(tim == &htim6){
-//	noteChange(i);
-//	i++;
-//	if (i >= 12) {
-//		i = 0;
-//	}
-
-//{ 262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494}
+//{ 262,   277, 294, 311,   330,  349, 370,   392,   415, 440,  466,  494}
 //  Do,   Do#, Re,   R#,    Mi,   Fa,   F#,   Sol,  Sol#, La,   La#,  Si
