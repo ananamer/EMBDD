@@ -25,6 +25,7 @@ typedef struct _buz
 
 void noteChange( int i);
 void buzzerStart(BUZ* buz);
+void buzzerStop(BUZ* buz);
 void buzInit(BUZ* buz);
 void buzOnTimerInterrupt(BUZ* buz);
 #endif /* SRC_BUZ_H_ */

@@ -21,7 +21,6 @@ void ledInit(LED* led, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 
 void ledOn(LED* led)
 {
-	//
 //	if(led->GPIO_Pin == LD3_Pin ){
 	HAL_GPIO_WritePin(led->GPIOx, led->GPIO_Pin, 1);
 	led->state = LED_ON;
@@ -40,41 +39,20 @@ void ledBlink(LED* led, int period)
 	led->period = period;
 	led->counter =0;
 	led->state = LED_BLINK;
-
 }
 
 void ledOnTimerInterrupt(LED* led)
 {
-
-
-
-			if( led->state == LED_BLINK){
-				led->counter ++;
-			}
-			if (led->counter >= maxCounter){
-						led->counter = 0;
-						HAL_GPIO_TogglePin(led->GPIOx, led->GPIO_Pin);
-			}
+	if( led->state == LED_BLINK){
+		led->counter ++;
+	}
+	if (led->counter >= maxCounter){
+		led->counter = 0;
+		HAL_GPIO_TogglePin(led->GPIOx, led->GPIO_Pin);
+	}
 }
 
 void ledStart(LED* led)
 {
 	led->state = LED_BLINK;
 }
-//	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-//	HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
-//void ledOnTimerInterrupt(LED* led);
-
-//void TIMER_CALLBACK()
-//{
-//	ledOnTimerInterrupt(&ledR);
-//	ledOnTimerInterrupt(&ledG);
-//}
-//
-//
-//typedef struct _led
-//{
-//	LED_STATE state;
-//	int counter;
-//
-//}LED;

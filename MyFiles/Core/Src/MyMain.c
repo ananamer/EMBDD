@@ -14,6 +14,8 @@
 #include "BUZ.h"
 #include <stdio.h>
 #include "Button.h"
+#include "commTask.h"
+#include "cli.h"
 
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
@@ -27,15 +29,11 @@ CLOCK clk;
 BUZ buz;
 
 // for the printf
-int _write(int fd, char* ptr, int len) {
-    HAL_UART_Transmit(&huart2, (uint8_t *) ptr, len, HAL_MAX_DELAY);
-    return len;
-}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
 {
 	if(tim == &htim6){
-		ClockOnTimerPeriod(&clk);
+//		ClockOnTimerPeriod(&clk);
 
 		ledOnTimerInterrupt(&ledB);
 		ledOnTimerInterrupt(&ledR);
@@ -89,7 +87,7 @@ void My_Main ()
 {
 
 
-	ClockInit(&clk);
+//	ClockInit(&clk);
 
 	buzInit(&buz);
 
@@ -106,5 +104,14 @@ void My_Main ()
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start(&htim3);
 
+	cliInit();
+	while(1){
+		if (commTask()) {
+				handleCommand();
+			}
+	}
+
 
 }
+
+

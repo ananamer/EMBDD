@@ -12,4 +12,5 @@
 void My_Main();
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim);
 void HAL_GPIO_EXTI_Callback(uint16_t pin);
+int commTask();
 #endif /* SRC_MYMAIN_H_ */

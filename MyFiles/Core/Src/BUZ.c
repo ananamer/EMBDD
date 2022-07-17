@@ -51,6 +51,10 @@ void buzzerStart(BUZ* buz)
 {
 	buz->state = BUZ_ON;
 }
+void buzzerStop(BUZ* buz)
+{
+	buz->state = BUZ_OFF;
+}
 
 void buzOnTimerInterrupt(BUZ* buz)
 {
