@@ -27,7 +27,7 @@ void ClockOnTimerPeriod(CLOCK* clk){
 	if(clk->tick >= 1000){
 		clk->second++;
 		clk->tick = 0;
-		printf( "day=%d\t HH:MM:SS\t %d:%d:%d \t\n\r", clk->day,clk->hour, clk->minute, clk->second);
+		printf( "day=%d\t HH:MM:SS\t %d:%d:%d \t\n\r", (int) clk->day,(int) clk->hour,(int) clk->minute,(int) clk->second);
 	}
 	if(clk->second == 60){
 		clk->minute ++;

@@ -16,6 +16,7 @@
 #include "Button.h"
 #include "commTask.h"
 #include "cli.h"
+#include "DHT.h"
 
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
@@ -28,8 +29,7 @@ RGB rgb1, rgb2, rgb3;
 CLOCK clk;
 BUZ buz;
 
-// for the printf
-
+int volLenCounter = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
 {
 	if(tim == &htim6){
@@ -44,7 +44,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
 
 		buzOnTimerInterrupt(&buz);
 	}
+
 }
+
 
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
@@ -86,7 +88,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t pin)
 void My_Main ()
 {
 
-
+//	DHT_main();
 //	ClockInit(&clk);
 
 	buzInit(&buz);
@@ -108,7 +110,7 @@ void My_Main ()
 	while(1){
 		if (commTask()) {
 				handleCommand();
-			}
+		}
 	}
 
 

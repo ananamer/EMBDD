@@ -11,6 +11,7 @@
 #include "Button.h"
 #include "LED.h"
 #include "BUZ.h"
+#include "DHT.h"
 #include <stdlib.h>
 
 extern LED ledB;
@@ -63,6 +64,13 @@ static void helpCmd(void * obj, char * param)
 	(void)param;
 	printCommands();
 }
+static void tmpCmd(void * obj, char * param)
+{
+	(void)obj;
+	(void)param;
+	DHT_main();
+
+}
 void cliInit()
 {
 	registerCommand("blueon", ledOnCmd, &ledB);
@@ -72,11 +80,13 @@ void cliInit()
 	registerCommand("blueoff", ledOffCmd, &ledB);
 	registerCommand("redoff", ledOffCmd, &ledR);
 
+
 	registerCommand("play", playCmd, &buz);
 	registerCommand("pause", pauseCmd, &buz);
 //	registerCommand("tone", playToneCmd, &buzzer);
 
 
 	registerCommand("help", helpCmd, NULL);
+	registerCommand("temp", tmpCmd, NULL);
 
 }
