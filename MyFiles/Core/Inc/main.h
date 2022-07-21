@@ -85,6 +85,7 @@ void Error_Handler(void);
 #define SWO_GPIO_Port GPIOB
 #define DHT_Pin GPIO_PIN_5
 #define DHT_GPIO_Port GPIOB
+#define DHT_EXTI_IRQn EXTI9_5_IRQn
 #define RGB2_Pin GPIO_PIN_6
 #define RGB2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

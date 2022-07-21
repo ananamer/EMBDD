@@ -28,6 +28,7 @@ LED ledB, ledR;
 RGB rgb1, rgb2, rgb3;
 CLOCK clk;
 BUZ buz;
+DHT _dht;
 
 int volLenCounter = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
@@ -50,17 +51,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
 
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
-	// Buzzer Start *************
+	if(pin == GPIO_PIN_5){
+		 Dht_onGpioInterrupt(&_dht);
+	}
+	else if (pin == SW1_Pin){
+		// Buzzer Start *************
 	if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 0) {
 		HAL_TIM_Base_Start(&htim3);
 		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 		buzzerStart(&buz);
 	}
 	// Buzzer End *************
-
-
 	 buttonOnTimerInterrupt();
-	// Button Start *************
+	}
+	 // Button Start *************
 //	static uint32_t press, release;
 //	if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 0) {
 //		press = HAL_GetTick();
@@ -107,6 +111,9 @@ void My_Main ()
 	HAL_TIM_Base_Start(&htim3);
 
 	cliInit();
+
+	dhtInit(&_dht, DHT_GPIO_Port, DHT_Pin);
+
 	while(1){
 		if (commTask()) {
 				handleCommand();

@@ -47,33 +47,8 @@ TIM_HandleTypeDef htim6;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t first_digits;
-uint8_t last_digits;
-uint8_t readBuff[SIZE];
-uint8_t digits;
-int _write(int fd, char* ptr, int len) {
-    HAL_UART_Transmit(&huart2, (uint8_t *) ptr, len, HAL_MAX_DELAY);
-    return len;
-}
 
 
-// mask = 00001111 = 15
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
-{
-
-	HAL_I2C_Mem_Read(&hi2c1, 0xD0, 0, 1, readBuff, 1, 0xff);
-	first_digits = readBuff[0] & 15;
-	last_digits = readBuff[0] >> 4;
-
-	digits = first_digits + (last_digits*10);
-	printf("%d\n\r", digits);
-//
-//
-//
-//
-
-}
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -124,18 +99,13 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-  HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
-  HAL_TIM_Base_Start_IT(&htim6);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t data[] = { 0 , 0, 0, 1, 1 ,1, 1, 1};
-
-  HAL_I2C_Mem_Write(&hi2c1, 0xD0, 0, 1, data, 7, 0xff);
-//  HAL_I2C_Mem_Read(&hi2c1, oxD0, 0, 1, readBuff, 7, oxff);
-  HAL_I2C_Mem_Read(&hi2c1, 0xD0, 0, 1, readBuff, 7, 0xff);
+  DateTime_Main();
 
 
   while (1)

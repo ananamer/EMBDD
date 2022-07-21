@@ -17,7 +17,7 @@
 extern LED ledB;
 extern LED ledR;
 extern BUZ buz;
-
+extern DHT _dht;
 
 static void ledOnCmd(void * obj, char * param)
 {
@@ -66,10 +66,10 @@ static void helpCmd(void * obj, char * param)
 }
 static void tmpCmd(void * obj, char * param)
 {
-	(void)obj;
 	(void)param;
-	DHT_main();
-
+	DHT * dht = (DHT *)obj;
+	//	DHT_main();
+	DHT_main_Async(dht);
 }
 void cliInit()
 {
@@ -83,10 +83,10 @@ void cliInit()
 
 	registerCommand("play", playCmd, &buz);
 	registerCommand("pause", pauseCmd, &buz);
-//	registerCommand("tone", playToneCmd, &buzzer);
+	registerCommand("tone", playToneCmd, &buz);
 
 
 	registerCommand("help", helpCmd, NULL);
-	registerCommand("temp", tmpCmd, NULL);
+	registerCommand("temp", tmpCmd, &_dht);
 
 }

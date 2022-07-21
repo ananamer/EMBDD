@@ -72,5 +72,13 @@ void buzOnTimerInterrupt(BUZ* buz)
 	}
 }
 
+void playToneCmd(void * obj, char * param)
+{
+//	(void)obj;
+	(void)param;
+	HAL_TIM_Base_Start(&htim3);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	buzzerStart(&obj);
+}
 //{ 262,   277, 294, 311,   330,  349, 370,   392,   415, 440,  466,  494}
 //  Do,   Do#, Re,   R#,    Mi,   Fa,   F#,   Sol,  Sol#, La,   La#,  Si

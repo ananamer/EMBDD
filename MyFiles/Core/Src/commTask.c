@@ -14,6 +14,7 @@
 #define MAX_BUFFER_LENGTH 100
 
 extern UART_HandleTypeDef huart2;
+
 typedef struct _reg_comm
 {
 	const char* name ;
