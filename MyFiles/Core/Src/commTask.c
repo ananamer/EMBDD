@@ -101,12 +101,10 @@ void handleCommand()
 		// put null character to split command name and parameters
 		*delimPtr = '\0';
 		param = delimPtr + 1;
-
 		// find first non space character - it's parameters beginning
 		while (*param && *param == ' ') {
 			param++;
 		}
-
 		if (*param == '\0') {
 			param = NULL;
 		}

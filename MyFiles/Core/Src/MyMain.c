@@ -17,6 +17,7 @@
 #include "commTask.h"
 #include "cli.h"
 #include "DHT.h"
+#include "MainTimer.h"
 
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
@@ -34,7 +35,7 @@ int volLenCounter = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
 {
 	if(tim == &htim6){
-//		ClockOnTimerPeriod(&clk);
+		ClockOnTimerPeriod(&clk);
 
 		ledOnTimerInterrupt(&ledB);
 		ledOnTimerInterrupt(&ledR);
@@ -45,9 +46,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
 
 		buzOnTimerInterrupt(&buz);
 	}
-
 }
-
 
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {

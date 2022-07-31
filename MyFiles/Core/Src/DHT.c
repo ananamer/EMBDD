@@ -119,16 +119,13 @@ void startCommunication()
 				printf("\r\n TIMEOUT");
 				return;
 			}
-
 	}
 	// start data transmission
-
 	return;
 }
 
 void dataTransmission()
 {
-
 	for(int i=0; i<40; i++){
 
 		__HAL_TIM_SET_COUNTER(&htim7, 0);
@@ -148,9 +145,6 @@ void dataTransmission()
 			}
 		}
 		dataBuff[i] = calculateTime(  _time);
-
-
-
 		}//for
 }
 
@@ -235,7 +229,7 @@ void Dht_onGpioInterrupt(DHT * dht)
 		case RECEIVING_BITS:
 			if(dht->counter <40){
 				tmp_time = __HAL_TIM_GET_COUNTER(&htim7);
-				dataBuff[7-dht->counter]= calculateTime(tmp_time - dht->lastFalling);
+				dataBuff[dht->counter]= calculateTime(tmp_time - dht->lastFalling);
 				dht->counter++ ;
 			}
 			else{
@@ -246,6 +240,7 @@ void Dht_onGpioInterrupt(DHT * dht)
 
 		case DATA_RECEIVED:
 			printTheTemprature();
+			dht->state = AWAITING_RESPONSE_START;
 			break;
 		default:
 			break;
@@ -260,7 +255,7 @@ void printTheTemprature()
 	decimalT =  calculateTemp(24);
 	checkSum =  calculateTemp(32);
 	printf("\r\n ------------------------------------------------ \r\n");
-	printf("\r\n{");
+	printf("\r\n");
 	for(int i=0; i<40; i++){
 		if(i%8 == 0){
 			printf("\r\n");

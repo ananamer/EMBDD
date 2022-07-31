@@ -42,7 +42,6 @@ static void ledBlinkCmd(void * obj, char * param)
 
 	ledBlink(led, period);
 }
-
 static void playCmd(void * obj, char * param)
 {
 	(void)param;
@@ -57,7 +56,6 @@ static void pauseCmd(void * obj, char * param)
 	BUZ * buzzer = (BUZ *)obj;
 	buzzerStop(buzzer);
 }
-
 static void helpCmd(void * obj, char * param)
 {
 	(void)obj;
