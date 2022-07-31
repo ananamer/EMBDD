@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdint.h>
 #include "main.h"
+#include "MainTimer.h"
+
 #define maxCounter 500
 
 void ledInit(LED* led, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
@@ -17,6 +19,8 @@ void ledInit(LED* led, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 	led->counter = 0;
 	led->GPIO_Pin = GPIO_Pin;
 	led->GPIOx = GPIOx;
+//	MainTimer_registerCallback(ledOnTimerInterrupt ,led);
+
 }
 
 void ledOn(LED* led)
@@ -28,6 +32,7 @@ void ledOn(LED* led)
 
 void ledOff(LED* led)
 {
+	MainTimer_uregisterCallback(ledOnTimerInterrupt ,led);
 	HAL_GPIO_WritePin(led->GPIOx, led->GPIO_Pin, 0);
 	led->state = LED_OFF;
 
@@ -36,6 +41,7 @@ void ledOff(LED* led)
 void ledBlink(LED* led, int period)
 {
     //HAL_Delay(period);
+	MainTimer_registerCallback(ledOnTimerInterrupt ,led);
 	led->period = period;
 	led->counter =0;
 	led->state = LED_BLINK;

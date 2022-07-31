@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdint.h>
 #include "main.h"
+#include "MainTimer.h"
+
 
 
 void rgbInit(RGB* rgb, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
@@ -17,6 +19,7 @@ void rgbInit(RGB* rgb, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 	rgb->counter = 0;
 	rgb->GPIO_Pin = GPIO_Pin;
 	rgb->GPIOx = GPIOx;
+
 }
 
 
@@ -27,13 +30,14 @@ void rgbOn(RGB* rgb){
 
 void rgbOff(RGB* rgb)
 {
+	MainTimer_uregisterCallback(rgbOnTimerInterrupt ,rgb);
 	HAL_GPIO_WritePin(rgb->GPIOx, rgb->GPIO_Pin, 0);
 	rgb->state = RGB_OFF;
 
 }
 void rgbBlink(RGB* rgb, int period)
 {
-
+	MainTimer_registerCallback(rgbOnTimerInterrupt ,rgb);
 	rgb->period = period;
 	rgb->counter =0;
 	rgb->state = RGB_BLINK;

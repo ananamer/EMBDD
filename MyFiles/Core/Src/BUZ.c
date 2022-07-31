@@ -8,11 +8,13 @@
 #include <stdint.h>
 #include <stdint.h>
 #include "BUZ.h"
+#include "MainTimer.h"
+
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart2;
-
+extern BUZ buz;
 //int notes[] = {262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494};
 int notes[] = {294, 330, 294, 330, 349,  0,  294, 330, 294, 330, 349,    0,       294, 330, 294, 330, 349,      330, 294, 330, 294, 262 ,0};
 int time[] =  {4,4,4,4,2,                 2,  4,4,4,4,2,                  2,       4,4,4,4,2        ,2,2,4,4,2, 2} ;
@@ -38,6 +40,8 @@ void buzInit(BUZ* buz)
 	buz->state = BUZ_OFF;
 	buz->counter = 0;
 	buz->maxCounter = 500;
+
+
 }
 
 void noteChange(int i)
@@ -49,15 +53,18 @@ void noteChange(int i)
 
 void buzzerStart(BUZ* buz)
 {
+	MainTimer_registerCallback(buzOnTimerInterrupt ,buz);
 	buz->state = BUZ_ON;
 }
 void buzzerStop(BUZ* buz)
 {
+	MainTimer_uregisterCallback(buzOnTimerInterrupt ,buz);
 	buz->state = BUZ_OFF;
 }
 
 void buzOnTimerInterrupt(BUZ* buz)
 {
+
 	if(buz->state == BUZ_ON) {
 		buz->counter ++;
 		if (buz->counter >= buz->maxCounter){
@@ -74,11 +81,12 @@ void buzOnTimerInterrupt(BUZ* buz)
 
 void playToneCmd(void * obj, char * param)
 {
-//	(void)obj;
-	(void)param;
+//	BUZ * buz = (BUZ *)obj;
+	(void) obj;
+	(void) param;
 	HAL_TIM_Base_Start(&htim3);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-	buzzerStart(&obj);
+	buzzerStart(&buz);
 }
 //{ 262,   277, 294, 311,   330,  349, 370,   392,   415, 440,  466,  494}
 //  Do,   Do#, Re,   R#,    Mi,   Fa,   F#,   Sol,  Sol#, La,   La#,  Si

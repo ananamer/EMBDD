@@ -32,21 +32,21 @@ BUZ buz;
 DHT _dht;
 
 int volLenCounter = 0;
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
-{
-	if(tim == &htim6){
-		ClockOnTimerPeriod(&clk);
-
-		ledOnTimerInterrupt(&ledB);
-		ledOnTimerInterrupt(&ledR);
-
-		rgbOnTimerInterrupt(&rgb1); // GREEN
-		rgbOnTimerInterrupt(&rgb2); // RED
-		rgbOnTimerInterrupt(&rgb3); // BLUE
-
-		buzOnTimerInterrupt(&buz);
-	}
-}
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
+//{
+//	if(tim == &htim6){
+//		ClockOnTimerPeriod(&clk);
+//
+//		ledOnTimerInterrupt(&ledB);
+//		ledOnTimerInterrupt(&ledR);
+//
+//		rgbOnTimerInterrupt(&rgb1); // GREEN
+//		rgbOnTimerInterrupt(&rgb2); // RED
+//		rgbOnTimerInterrupt(&rgb3); // BLUE
+//
+//		buzOnTimerInterrupt(&buz);
+//	}
+//}
 
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
@@ -58,7 +58,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t pin)
 	if (HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 0) {
 		HAL_TIM_Base_Start(&htim3);
 		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-		buzzerStart(&buz);
+//		buzzerStart(&buz);
 	}
 	// Buzzer End *************
 	 buttonOnTimerInterrupt();

@@ -1,5 +1,4 @@
-#include "FlashLight.h"
-#include "main.h"
+
 /*
  * FlashLight.c
  *
@@ -12,6 +11,11 @@
 //	STATE_FULL,
 //	STATE_HALF,
 //	STATE_BLINK,
+
+#include "FlashLight.h"
+#include "main.h"
+#include "MainTimer.h"
+
 extern TIM_HandleTypeDef htim6;
 int bright_set;
 

@@ -9,8 +9,15 @@
 #define SRC_CLOCK_H_
 #include "stm32l4xx_hal.h"
 
+typedef enum _clkState
+{
+	CLK_OFF,
+	CLK_ON,
+} CLK_STATE;
+
 typedef struct _clock
 {
+	CLK_STATE state;
 	uint32_t tick;
 	uint32_t second;
 	uint32_t minute;
@@ -19,7 +26,8 @@ typedef struct _clock
 
 }CLOCK;
 
-
+void clkOn(CLOCK* clk);
+void clkOff(CLOCK* clk);
 void ClockInit(CLOCK* clk);
 //void time(CLOCK* clk);
 

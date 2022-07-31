@@ -10,6 +10,8 @@
 #include "commTask.h"
 #include <math.h>
 #include "DHT.h"
+#include "MainTimer.h"
+
 extern TIM_HandleTypeDef htim7;
 
 #define SIZE 40
@@ -207,6 +209,8 @@ void dhtInit(DHT* dht, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 	dht->GPIO_Pin = GPIO_Pin;
 	dht->GPIOx = GPIOx;
 	dht->counter = 0;
+	//MainTimer_registerCallback(Dht_onGpioInterrupt ,dht);
+
 }
 
 
