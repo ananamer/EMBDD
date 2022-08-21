@@ -67,13 +67,13 @@ static void rgbblinkCmd(void * obj, char * param)
 }
 
 // Buzzer
-static void playCmd(void * obj, char * param)
-{
-	(void)param;
-
-	BUZ * buzzer = (BUZ *)obj;
-	buzzerStart(buzzer);
-}
+//static void playCmd(void * obj, char * param)
+//{
+//	(void)param;
+//
+//	BUZ * buzzer = (BUZ *)obj;
+//	buzzerStart(buzzer);
+//}
 static void pauseCmd(void * obj, char * param)
 {
 	(void)param;
