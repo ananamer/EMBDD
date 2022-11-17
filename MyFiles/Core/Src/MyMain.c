@@ -18,6 +18,7 @@
 #include "cli.h"
 #include "DHT.h"
 #include "MainTimer.h"
+#include "flash.h"
 
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
@@ -35,16 +36,17 @@ int volLenCounter = 0;
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * tim)
 //{
 //	if(tim == &htim6){
-//		ClockOnTimerPeriod(&clk);
-//
-//		ledOnTimerInterrupt(&ledB);
-//		ledOnTimerInterrupt(&ledR);
-//
-//		rgbOnTimerInterrupt(&rgb1); // GREEN
-//		rgbOnTimerInterrupt(&rgb2); // RED
-//		rgbOnTimerInterrupt(&rgb3); // BLUE
-//
-//		buzOnTimerInterrupt(&buz);
+//		printf("from timer interrupt \r\n");
+////		ClockOnTimerPeriod(&clk);
+////
+////		ledOnTimerInterrupt(&ledB);
+////		ledOnTimerInterrupt(&ledR);
+////
+////		rgbOnTimerInterrupt(&rgb1); // GREEN
+////		rgbOnTimerInterrupt(&rgb2); // RED
+////		rgbOnTimerInterrupt(&rgb3); // BLUE
+////
+////		buzOnTimerInterrupt(&buz);
 //	}
 //}
 
@@ -104,14 +106,19 @@ void My_Main ()
 	rgbInit(&rgb3, RGB3_GPIO_Port, RGB3_Pin); // BLUE
 
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-	HAL_NVIC_EnableIRQ( TIM6_DAC_IRQn );
+	HAL_NVIC_EnableIRQ( TIM6_DAC_IRQn ); // Im turning it on in the flash.c main_stor
 	HAL_NVIC_EnableIRQ( TIM3_IRQn  );
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start(&htim3);
 
 	cliInit();
 
-	dhtInit(&_dht, DHT_GPIO_Port, DHT_Pin);
+//	dhtInit(&_dht, DHT_GPIO_Port, DHT_Pin);
+
+//	Dht_readAsync(&_dht);
+//	flash_main_IT();
+	flash_main_STORE();
+
 
 	while(1){
 		if (commTask()) {

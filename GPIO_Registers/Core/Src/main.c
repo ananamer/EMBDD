@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,6 +43,12 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+uint32_t* GPIOA_MODER  = (uint32_t*)0x48000000UL; // Mode Register
+uint32_t* GPIOA_IDR    = (uint32_t*)0x48000010UL; // Input Data Register
+uint32_t* GPIOA_ODR    = (uint32_t*)0x48000014UL; // Output Data Register
+uint32_t* MYRCC = (uint32_t*)0x40021000UL; // RCC
+uint32_t* TIMER6 = (uint32_t*)(0x40001000);
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,6 +64,15 @@ static void MX_USART2_UART_Init(void);
 int _write(int fd, char* ptr, int len) {
     HAL_UART_Transmit(&huart2, (uint8_t *) ptr, len, HAL_MAX_DELAY);
     return len;
+}
+
+
+void TIM6_DAC_IRQHandler()
+{
+	if(TIMER6[0x10/4] == 1){
+		printf("TIM6 from interrupt \r\n");
+		TIMER6[0x10/4] = 0;
+	}
 }
 /* USER CODE END 0 */
 
@@ -84,45 +99,85 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+
   /* USER CODE BEGIN 2 */
-  uint32_t* GPIOA_MODER = (uint32_t*)0x48000000UL; // Mode Register
-  uint32_t* GPIOA_OTYPER = (uint32_t*)0x48000004UL; // Output Register
-  uint32_t* GPIOA_OSPEED = (uint32_t*)0x48000008UL; // Output Speed
-  uint32_t* GPIOA_PUPDR  = (uint32_t*)0x4800000CUL; //PullUp/PullDown
-  uint32_t* GPIOA_IDR    = (uint32_t*)0x48000010UL; // Input Data Register
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint32_t SW1 ;
-  uint32_t mode_register = *GPIOA_MODER;
+
+
   // mask mode_register with 2120
-  // 3<<5*4
+  // 3<<20
   // set the 2120 bits to [00] input
-  uint32_t mode10Mask = 3<< 10*2; // ...00011000...
+  uint32_t mode_register = *GPIOA_MODER;
+  uint32_t mode10Mask = 3<< 10*2; // ...000 11 000...
   mode_register &= ~mode10Mask;  // ...11100111...
   *GPIOA_MODER = mode_register;
 
+  // ********** GPIO mode register looks like :
+  // 1111 1111 1100 1111
+  // 1111 1111 1111 1111
 
-	HAL_UART_Transmit(&huart2, (uint8_t*)"TEST\r\n", 8, 100);
-//	HAL_UART_Transmit(&huart2, (uint8_t*)mode_register , 32, 100);
-	printf("TEST2\r\n");
-	printf("%d\r\n", mode_register);
-	printf("%lu\r\n", mode_register);
+  // mask mode_register with 1312
+  // 1<<12
+  // set the 1312 bits to [01] input
 
-	printf("mode10Mask = %d\r\n", mode10Mask);
+  // ********** want to GPIO mode register looks like :
+  // 1111 1111 1100 1111
+  // 1111 0111 1111 1111
+  // do the mask with ~mode13mask
+
+  uint32_t ID10_state = *GPIOA_IDR & (1<<10); // it must be 0000010 00000000 / 1024
+  uint32_t mode13Mask = 1<<13; // ...000 10 000...
+  mode_register = *GPIOA_MODER;
+  // 1111 1111 11[00] 1111
+  // 1111 1111 1111 1111
+  mode_register &= ~mode13Mask;
+  // 1111 1111 11[00] 1111
+  // 1111 [01]11 1111 1111
+  *GPIOA_MODER = mode_register;
+  MYRCC[0x58/4] |= 1<<4;
+  TIMER6[0x00] |= 1;
+  TIMER6[0x28/4] = 7999;
+  TIMER6[0x2C/4] = 9999;
+  TIMER6[0x0C/4] |= 1;
+
+  printf("TEST\r\n");
+
+  // 0000 0000 0100 0000
+  uint32_t OT6_state = *GPIOA_ODR | (1<<6);
+  *GPIOA_ODR = ~OT6_state;
+  uint32_t ID10_currentState ;
+
 	while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	HAL_UART_Transmit(&huart2, mode_register , sizeof(mode_register), 100);
+
+		// check if the ID10_state changed and print its value
+		ID10_currentState = *GPIOA_IDR & (1<<10);
+		if(ID10_currentState != ID10_state){
+			printf("Button Pressed !! \r\n\r\n");
+
+			*GPIOA_ODR = OT6_state;
+
+		}
+
+//		if(TIMER6[0x10/4] == 1)
+//		{
+//			printf("asdas\r\n");
+//			TIMER6[0x10/4] = 0;
+//		}
+		//	HAL_UART_Transmit(&huart2, mode_register , sizeof(mode_register), 100);
   }
   /* USER CODE END 3 */
 }

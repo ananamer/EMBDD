@@ -39,4 +39,5 @@ void Dht_readAsync(DHT* dht);
 void dhtInit(DHT* dht, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 void Dht_onGpioInterrupt(DHT * dht);
 void printTheTemprature();
+void returnTheTemprature(int* humidity, int* temp);
 #endif /* SRC_DHT_H_ */

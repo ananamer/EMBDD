@@ -39,7 +39,6 @@ uint8_t readBuff[BuffSIZE];
 void createAlarm( DateTime* time, char* name)
 {
 	ALARM alarm;
-//	printf("%s\r\n", name);
 	Alarm_init(&alarm, time, name);
 
 	alarmArr[numOfAlarms] = alarm;
@@ -60,13 +59,10 @@ void printAlarms()
 void editAlarm()
 {
 
-
 }
 uint32_t getSeconds(DateTime* dateTime)
 {
 	// calculate seconds from 00:00:00 1/1/2020
-
-
 	uint32_t seconds = dateTime->sec +
 			dateTime->min * SecondsInMin +
 			dateTime->hours * SecondsInHour +

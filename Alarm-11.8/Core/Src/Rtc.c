@@ -71,7 +71,8 @@ static uint8_t intToBcd(int value, int minVal, int maxVal)
 void rtcGetTime(Rtc * rtc, DateTime * dateTime)
 {
 	uint8_t buffer[RTC_DATE_TIME_SIZE];
-	HAL_I2C_Mem_Read(rtc->hi2c, rtc->devAddr, 0, 1, buffer, RTC_DATE_TIME_SIZE, 0xFF);
+	HAL_I2C_Mem_Read(rtc->hi2c, rtc->devAddr, 0, 				1, 	 buffer, RTC_DATE_TIME_SIZE, 0xFF);
+//	HAL_I2C_Mem_Read(	 hi2c1,         0xD0, 0, 1, buffer, RTC_DATE_TIME_SIZE, 	0xFF);
 
 	// remove stop bit if set
 	buffer[0] &= ~RTC_START_STOP;

@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define MAX_COMMANDS 20
+#define MAX_COMMANDS 50
 #define MAX_BUFFER_LENGTH 100
 
 extern UART_HandleTypeDef huart2;
@@ -112,7 +112,7 @@ void handleCommand()
 
 	for (int i = 0; i < commandsCount; i++) {
 		if (strcmp(commandsArr[i].name, (char *)cmdbuffer) == 0) {
-			commandsArr[i].func(commandsArr[i].obj, param);
+			commandsArr[i].command->doCommand(param);
 			return;
 		}
 	}

@@ -150,18 +150,22 @@ void dataTransmission()
 		}//for
 }
 
+
+
 void DHT_main()
 {
 	HAL_TIM_Base_Start(&htim7);
 	startCommunication();
 	dataTransmission();
 	printTheTemprature();
+//	returnTheTemprature();
+
+
 }
 
 void DHT_main_Async(DHT* dht)
 {
 	Dht_readAsync(dht);
-
 }
 
 static void setGpioOutput (DHT * dht)
@@ -190,9 +194,10 @@ static void setGpioExti (DHT * dht)
 void Dht_readAsync(DHT* dht)
 {
 	setGpioOutput(dht);
-
+	printf("from Dht_readAsync\r\n");
 	HAL_TIM_Base_Start(&htim7);
 	__HAL_TIM_SET_COUNTER(&htim7, 0);
+
 	HAL_GPIO_WritePin(DHT_GPIO_Port, DHT_Pin, 0);
 	wait(18000);
 	HAL_GPIO_WritePin(DHT_GPIO_Port, DHT_Pin, 1);
@@ -201,6 +206,7 @@ void Dht_readAsync(DHT* dht)
 
 	setGpioExti(dht);
 	// when the DHT fall down to 0 the interrupt will handle
+
 }
 
 void dhtInit(DHT* dht, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
@@ -251,6 +257,13 @@ void Dht_onGpioInterrupt(DHT * dht)
 	}
 }
 
+
+void returnTheTemprature(int* humidity, int* temp)
+{
+	*humidity = calculateTemp(0);
+	*temp = calculateTemp(16);
+
+}
 void printTheTemprature()
 {
 	integralRH = calculateTemp(0);

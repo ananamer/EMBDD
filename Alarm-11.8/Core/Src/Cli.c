@@ -64,14 +64,9 @@ static void printCmd(void * obj, char * param)
 }
 void cliInit()
 {
-
-
-
 	registerCommand("help", helpCmd, NULL);
 	registerCommand("setAlarm", setCmd, NULL);
 	registerCommand("deleteAlarm", deleteCmd, NULL);
 	registerCommand("editAlarm", editCmd, NULL);
 	registerCommand("printAlarms", printCmd, NULL);
-
-
 }
