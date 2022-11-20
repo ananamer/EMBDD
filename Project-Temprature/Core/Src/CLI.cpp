@@ -12,10 +12,12 @@
 #include "MyMain.h"
 #include <string.h>
 #include "BUZ.h"
+#include "DHT.h"
 
 extern LED redLed;
 extern LED bluLed;
 extern BUZ buz;
+extern DHT dht;
 int myGlobalVariable = 0;
 
 CLI::CLI() {
@@ -58,6 +60,17 @@ public:
 	}
 };
 
+
+class TempCmd : public CliCommand
+{
+	DHT * _dht;
+public:
+	TempCmd(DHT * dht) : _dht(dht) {}
+	void doCommand(const char* param) {
+//		_dht->Dht_readAsync();
+		_dht->DHT_main();
+	}
+};
 class LedOnCmd : public CliCommand
 {
 	LED * _led;
@@ -135,6 +148,8 @@ void CLI::CliInit()
 
 	registerCommand("buzon", new BuzOnCmd(&buz));
 	registerCommand("buzoff", new BuzOffCmd(&buz));
+
+	registerCommand("temp", new TempCmd(&dht));
 
 
 //	registerCommand("blueon", new BluOnCmd(&bluLed));

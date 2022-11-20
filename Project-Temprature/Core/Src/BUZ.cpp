@@ -15,7 +15,6 @@ BUZ::BUZ() {
 BUZ::BUZ(BUZ_STATE state)
 {
 	State = state;
-
 }
 
 BUZ::~BUZ() {
