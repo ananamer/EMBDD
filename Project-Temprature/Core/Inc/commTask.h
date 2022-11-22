@@ -13,7 +13,8 @@
 
 typedef void (*HanlderFunc)(void *, char *);
 
-int commTask();
+void commTask();
+int communication();
 void handleCommand();
 //int _write(int fd, char* ptr, int len);
 void registerCommand(const char * name, CliCommand * command);

@@ -32,6 +32,7 @@ DHT::DHT(GPIO_TypeDef* gpiox, uint16_t gpio_pin)
 	GPIO_Pin = gpio_pin;
 	state = AWAITING_RESPONSE_START;
 	counter = 0;
+	temperature = 0.0;
 }
 int DHT::calculateTemp(int index)
 {
@@ -79,7 +80,7 @@ void DHT::startCommunication()
 	while (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == 1){
 		_time = __HAL_TIM_GET_COUNTER(&htim7);
 		if(_time > 100){
-			printf("\r\n TIMEOUT\r\n");
+			printf("\r\n TIMEOUT1\r\n");
 			return;
 		}
 	}
@@ -88,7 +89,7 @@ void DHT::startCommunication()
 	while (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == 0){
 		_time = __HAL_TIM_GET_COUNTER(&htim7);
 			if(_time > 100){
-				printf("\r\n TIMEOUT");
+				printf("\r\n TIMEOUT2");
 				return;
 			}
 	}
@@ -97,7 +98,7 @@ void DHT::startCommunication()
 	while (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == 1){
 		_time = __HAL_TIM_GET_COUNTER(&htim7);
 			if(_time > 100){
-				printf("\r\n TIMEOUT");
+				printf("\r\n TIMEOUT3");
 				return;
 			}
 	}
@@ -113,7 +114,7 @@ void DHT::dataTransmission()
 		while( HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == 0  ){ // while(0)
 			_time = __HAL_TIM_GET_COUNTER(&htim7);
 			if(_time > 100){
-				printf("\r\n TIMEOUT");
+				printf("\r\n TIMEOUT4");
 				return;
 			}
 		}
@@ -121,7 +122,7 @@ void DHT::dataTransmission()
 		while( HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == 1  ){ // while(1)
 			_time = __HAL_TIM_GET_COUNTER(&htim7);
 			if(_time > 100){
-				printf("\r\n TIMEOUT");
+				printf("\r\n TIMEOUT5");
 				return;
 			}
 		}
@@ -133,8 +134,8 @@ void DHT::DHT_main()
 	HAL_TIM_Base_Start(&htim7);
 	startCommunication();
 	dataTransmission();
-	printTheTemprature();
-//	returnTheTemprature();
+	measureTemp();
+//	printTheTemprature();
 }
 void DHT::setGpioOutput()
 {
@@ -218,27 +219,21 @@ void DHT::returnTheTemprature(int* humidity, int* temp)
 }
 void DHT::printTheTemprature()
 {
-	integralRH = calculateTemp(0);
-	decimalRH =  calculateTemp(8);
-	integralT = calculateTemp(16);
-	decimalT =  calculateTemp(24);
-	checkSum =  calculateTemp(32);
-//	printf("\r\n ------------------------------------------------ \r\n");
-//	printf("\r\n");
-//	for(int i=0; i<40; i++){
-//		if(i%8 == 0){
-//			printf("\r\n");
-//		}
-//		printf("%d ," , dataBuff[i] );
-//	}
-//	printf("\r\n");
-//	printf("Humidity = %d.%d\r\n"
-//			 "Temprature  = %d.%d\r\n"
-//			"checkSum = %d \r\n"
-//			, integralRH, decimalRH, integralT, decimalT, checkSum      );
+//  THIS DONE IN THE measureTemp()
+	//-----------------------------
+//	integralRH = calculateTemp(0);
+//	decimalRH =  calculateTemp(8);
+//	integralT = calculateTemp(16);
+//	decimalT =  calculateTemp(24);
+//	checkSum =  calculateTemp(32);
+	//-----------------------------
+
+
 	printf("Humidity = %d.%d\r\n"
 			 "Temprature  = %d.%d\r\n"
-			, integralRH, decimalRH, integralT, decimalT);
+			, integralRH, decimalRH,
+				integralT, decimalT);
+
 
 	if(checkSum != (integralRH + decimalRH + integralT + decimalT)){
 		printf("CheckSum ERROR !\r\n");
@@ -247,3 +242,12 @@ void DHT::printTheTemprature()
 //	printf("\r\n ------------------------------------------------ \r\n");
 }
 
+void DHT::measureTemp()
+{
+	integralRH = calculateTemp(0);
+	decimalRH =  calculateTemp(8);
+	integralT = calculateTemp(16);
+	decimalT =  calculateTemp(24);
+	checkSum =  calculateTemp(32);
+	temperature = (double)integralT +  (double)decimalT/100 ;
+}

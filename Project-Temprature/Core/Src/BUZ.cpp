@@ -26,7 +26,6 @@ void BUZ::buzzStart()
 	State = BUZ_ON;
 	HAL_TIM_Base_Start(&htim3);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-
 }
 
 void BUZ::buzzStop()

@@ -26,19 +26,21 @@ LED::LED(GPIO_TypeDef* gpiox, uint16_t gpio_pin, LED_STATE state){
 void LED::LedOn()
 {
 	State = LED_ON;
-	HAL_GPIO_WritePin(this->GPIOx, this->GPIO_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
+//	HAL_GPIO_WritePin(this->GPIOx, this->GPIO_Pin, GPIO_PIN_SET);
+
 }
 
 void LED::LedOFF()
 {
 	State = LED_OFF;
-	HAL_GPIO_WritePin(this->GPIOx, this->GPIO_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
 
 }
 void LED::LedBlink()
 {
 	State = LED_BLINK;
-//	HAL_TIM_Base_Start_IT(&htim7);
+	HAL_GPIO_TogglePin(GPIOx, GPIO_Pin);
 }
 void LED::LedStopBlink()
 {

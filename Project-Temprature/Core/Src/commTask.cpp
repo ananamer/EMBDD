@@ -29,7 +29,16 @@ CLI cli;
 //    return len;
 //}
 
-int commTask()
+
+void commTask()
+{
+	while(1){
+		if(communication()){
+			handleCommand();
+		}
+	}
+}
+int communication()
 {
 	uint8_t ch;
 	HAL_StatusTypeDef Status = HAL_UART_Receive(&huart2, &ch, 1, 10);

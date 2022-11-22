@@ -29,6 +29,7 @@ public:
 	virtual ~BUZ();
 	void buzzStart();
 	void buzzStop();
+
 	BUZ_STATE getState(){return State;}
 
 };
