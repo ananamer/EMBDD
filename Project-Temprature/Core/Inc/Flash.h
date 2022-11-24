@@ -35,12 +35,12 @@ public:
 	virtual ~Flash();
 
 	Flash(uint32_t bank, uint32_t pageAddr, uint32_t nbPage, uint32_t typeProgram)
-		{
-			_bank = bank;
-			_pageAddr = pageAddr;
-			_nbPages = nbPage;
-			_typeProgram = typeProgram;
-		}
+	{
+		_bank = bank;
+		_pageAddr = pageAddr;
+		_nbPages = nbPage;
+		_typeProgram = typeProgram;
+	}
 	HAL_StatusTypeDef erasePage();
 	HAL_StatusTypeDef writeToPage(void* data, int dataSize);
 
@@ -49,8 +49,9 @@ public:
 	uint32_t getNbPages(){return _nbPages;}
 	uint32_t getTypeProgram(){return _typeProgram;}
 
-	int getWarning();
-	int getCritical();
+	int getWarning(){return _thresholds.warning;}
+	int getCritical(){return _thresholds.critical;}
+
 
 	void printThresHolds();
 	void setWarning(int warning);

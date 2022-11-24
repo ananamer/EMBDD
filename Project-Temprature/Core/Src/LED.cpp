@@ -27,15 +27,11 @@ void LED::LedOn()
 {
 	State = LED_ON;
 	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
-//	HAL_GPIO_WritePin(this->GPIOx, this->GPIO_Pin, GPIO_PIN_SET);
-
 }
-
 void LED::LedOFF()
 {
 	State = LED_OFF;
 	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
-
 }
 void LED::LedBlink()
 {
@@ -45,6 +41,5 @@ void LED::LedBlink()
 void LED::LedStopBlink()
 {
 	State = LED_ON;
-//	HAL_TIM_Base_Stop_IT(&htim7);
 }
 

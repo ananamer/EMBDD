@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MyMain.h"
+#include "commTask.h"
 #include <stdio.h>
 /* USER CODE END Includes */
 
@@ -54,7 +55,7 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for myTask02 */
 osThreadId_t myTask02Handle;
@@ -77,6 +78,13 @@ const osThreadAttr_t myTask04_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for myTask05 */
+osThreadId_t myTask05Handle;
+const osThreadAttr_t myTask05_attributes = {
+  .name = "myTask05",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -90,9 +98,10 @@ static void MX_TIM7_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_I2C1_Init(void);
 void StartDefaultTask(void *argument);
-void commTask(void *argument);
-void measureTemp(void *argument);
-void LedTask(void *argument);
+void StartTask02(void *argument);
+void StartTask03(void *argument);
+void StartTask04(void *argument);
+void StartTask05(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -183,13 +192,16 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of myTask02 */
-  myTask02Handle = osThreadNew(commTask, NULL, &myTask02_attributes);
+  myTask02Handle = osThreadNew(StartTask02, NULL, &myTask02_attributes);
 
   /* creation of myTask03 */
-  myTask03Handle = osThreadNew(measureTemp, NULL, &myTask03_attributes);
+  myTask03Handle = osThreadNew(StartTask03, NULL, &myTask03_attributes);
 
   /* creation of myTask04 */
-  myTask04Handle = osThreadNew(LedTask, NULL, &myTask04_attributes);
+  myTask04Handle = osThreadNew(StartTask04, NULL, &myTask04_attributes);
+
+  /* creation of myTask05 */
+  myTask05Handle = osThreadNew(StartTask05, NULL, &myTask05_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -323,7 +335,6 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
 
@@ -336,15 +347,6 @@ static void MX_TIM3_Init(void)
   htim3.Init.Period = 100;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
@@ -514,7 +516,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : SW1_Pin */
   GPIO_InitStruct.Pin = SW1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SW1_GPIO_Port, &GPIO_InitStruct);
 
@@ -564,58 +566,87 @@ void StartDefaultTask(void *argument)
   /* USER CODE END 5 */
 }
 
-/* USER CODE BEGIN Header_commTask */
+/* USER CODE BEGIN Header_StartTask02 */
 /**
 * @brief Function implementing the myTask02 thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_commTask */
-__weak void commTask(void *argument)
+/* USER CODE END Header_StartTask02 */
+__weak void StartTask02(void *argument)
 {
-  /* USER CODE BEGIN commTask */
+  /* USER CODE BEGIN StartTask02 */
   /* Infinite loop */
+
+	// $$$$ THIS IS [ communication Task ]
   for(;;)
   {
-    osDelay(1);
+//	printf("FROM TASK 2\r\n");
+    if(communication()){
+    	handleCommand();
+    }
+	osDelay(1);
   }
-  /* USER CODE END commTask */
+  /* USER CODE END StartTask02 */
 }
 
-/* USER CODE BEGIN Header_measureTemp */
+/* USER CODE BEGIN Header_StartTask03 */
 /**
 * @brief Function implementing the myTask03 thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_measureTemp */
-__weak void measureTemp(void *argument)
+/* USER CODE END Header_StartTask03 */
+__weak void StartTask03(void *argument)
 {
-  /* USER CODE BEGIN measureTemp */
+  /* USER CODE BEGIN StartTask03 */
   /* Infinite loop */
+	// $$$$ THIS IS [ temperature measuring task ]
   for(;;)
   {
+	 dhtTask();
     osDelay(1000);
   }
-  /* USER CODE END measureTemp */
+  /* USER CODE END StartTask03 */
 }
 
-/* USER CODE BEGIN Header_LedTask */
+/* USER CODE BEGIN Header_StartTask04 */
 /**
 * @brief Function implementing the myTask04 thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_LedTask */
-__weak void LedTask(void *argument)
+/* USER CODE END Header_StartTask04 */
+__weak void StartTask04(void *argument)
 {
-  /* USER CODE BEGIN LedTask */
+  /* USER CODE BEGIN StartTask04 */
+  /* Infinite loop */
+	// $$$$ THIS IS [ LED Task ]
+  for(;;)
+  {
+	LedTask();
+    osDelay(1);
+  }
+  /* USER CODE END StartTask04 */
+}
+
+/* USER CODE BEGIN Header_StartTask05 */
+/**
+* @brief Function implementing the myTask05 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask05 */
+__weak void StartTask05(void *argument)
+{
+  /* USER CODE BEGIN StartTask05 */
   /* Infinite loop */
   for(;;)
   {
+	TimeTask();
     osDelay(1);
   }
-  /* USER CODE END LedTask */
+  /* USER CODE END StartTask05 */
 }
 
 /**

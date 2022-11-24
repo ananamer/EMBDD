@@ -58,19 +58,9 @@ HAL_StatusTypeDef Flash :: writeToPage(void* data, int dataSize)
 		index += sizeof(uint64_t);
 	}
 	HAL_FLASH_Lock();
-	//printf("%d\r\n", status);
 	return status;
 }
 
-int Flash :: getWarning()
-{
-	return _thresholds.warning;
-}
-
-int Flash :: getCritical()
-{
-	return _thresholds.critical;
-}
 
 void Flash :: setWarning(int warning)
 {

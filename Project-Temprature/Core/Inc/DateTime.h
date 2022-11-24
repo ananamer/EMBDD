@@ -8,17 +8,15 @@
 #ifndef INC_DATETIME_H_
 #define INC_DATETIME_H_
 
-typedef struct DateTime
+typedef struct DateTime_
 {
-	uint8_t sec;
-	uint8_t min;
-	uint8_t hours;
-	uint8_t weekDay;
-	uint8_t day;
-	uint8_t month;
-	uint8_t year;
-	uint8_t spare;
-
+	int sec;
+	int min;
+	int hours;
+	int weekDay;
+	int day;
+	int month;
+	int year;
 } DateTime;
 
 #endif /* INC_DATETIME_H_ */

@@ -13,32 +13,23 @@
 #include <string.h>
 #include "BUZ.h"
 #include "DHT.h"
+#include "Flash.h"
+#include <stdlib.h>
 
 extern LED redLed;
 extern LED bluLed;
 extern BUZ buz;
 extern DHT dht;
+extern Flash Thresholds;
 int myGlobalVariable = 0;
 
 CLI::CLI() {
 	// TODO Auto-generated constructor stub
-
 }
 
 CLI::~CLI() {
 	// TODO Auto-generated destructor stub
 }
-
-class HelpCmd : public CliCommand
-{
-	CLI * _cli;
-public:
-	HelpCmd(CLI * cli) : _cli(cli) {}
-	void doCommand(const char* param) {
-		_cli->printCommands();
-	}
-
-};
 
 
 class BuzOnCmd : public CliCommand
@@ -60,17 +51,6 @@ public:
 	}
 };
 
-
-class TempCmd : public CliCommand
-{
-	DHT * _dht;
-public:
-	TempCmd(DHT * dht) : _dht(dht) {}
-	void doCommand(const char* param) {
-//		_dht->Dht_readAsync();
-		_dht->DHT_main();
-	}
-};
 class LedOnCmd : public CliCommand
 {
 	LED * _led;
@@ -89,7 +69,6 @@ public:
 		_led->LedOFF();
 	}
 };
-
 class LedBlinkCmd : public CliCommand
 {
 	LED * _led;
@@ -99,6 +78,7 @@ public:
 		_led->LedBlink();
 	}
 };
+// LedStopBlinkCmd may not be used
 class LedStopBlinkCmd : public CliCommand
 {
 	LED * _led;
@@ -106,6 +86,61 @@ public:
 	LedStopBlinkCmd(LED * led) : _led(led) {}
 	void doCommand(const char* param) {
 		_led->LedStopBlink();
+	}
+};
+
+// TempCmd will read the temp from dht and print it
+class TempCmd : public CliCommand
+{
+	DHT * _dht;
+public:
+	TempCmd(DHT * dht) : _dht(dht) {}
+	void doCommand(const char* param) {
+//		_dht->Dht_readAsync();
+		_dht->DHT_main();
+	}
+};
+class SetWarningCmd : public CliCommand
+{
+	Flash * _thresholds;
+public:
+	SetWarningCmd(Flash * thresholds) : _thresholds(thresholds) {}
+	void doCommand(const char* param) {
+
+	int value = atoi(param);
+	_thresholds->setWarning(value);
+	}
+};
+class SetCriticalCmd : public CliCommand
+{
+	Flash * _thresholds;
+public:
+	SetCriticalCmd(Flash * thresholds) : _thresholds(thresholds) {}
+	void doCommand(const char* param) {
+
+	int value = atoi(param);
+	_thresholds->setCritical(value);
+	}
+};
+class PrintThresholdsCmd: public CliCommand
+{
+	Flash * _thresholds;
+public:
+	PrintThresholdsCmd(Flash * thresholds) : _thresholds(thresholds) {}
+	void doCommand(const char* param) {
+
+	_thresholds->printThresHolds();
+	}
+};
+
+// HelpCmd will print the commands in the CLI
+class HelpCmd : public CliCommand
+{
+	CLI * _cli;
+public:
+	HelpCmd(CLI * cli) : _cli(cli) {}
+	void doCommand(const char* param) {
+		_cli->printCommands();
 	}
 };
 void CLI::registerCommand(const char * name, CliCommand * command)
@@ -136,23 +171,24 @@ void CLI::printCommands()
 	}
 }
 
+
+
 void CLI::CliInit()
 {
+
 	registerCommand("redon", new LedOnCmd(&redLed));
 	registerCommand("redoff", new LedOffCmd(&redLed));
-
 	registerCommand("redblink", new LedBlinkCmd(&redLed));
 	registerCommand("redstop", new LedStopBlinkCmd(&redLed));
-
-	registerCommand("help", new HelpCmd(this));
 
 	registerCommand("buzon", new BuzOnCmd(&buz));
 	registerCommand("buzoff", new BuzOffCmd(&buz));
 
 	registerCommand("temp", new TempCmd(&dht));
+	registerCommand("setW", new SetWarningCmd(&Thresholds));
+	registerCommand("setC", new SetCriticalCmd(&Thresholds));
+	registerCommand("thresholds", new PrintThresholdsCmd(&Thresholds));
 
-
-//	registerCommand("blueon", new BluOnCmd(&bluLed));
-//	registerCommand("blueoff", new BluOffCmd(&bluLed));
+	registerCommand("help", new HelpCmd(this));
 
 }

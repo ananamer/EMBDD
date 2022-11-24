@@ -7,6 +7,7 @@
 
 #ifndef SRC_CLI_H_
 #define SRC_CLI_H_
+#include "CliCommand.h"
 #include "commTask.h"
 #include "main.h"
 

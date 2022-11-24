@@ -53,15 +53,8 @@ public:
 	void startCommunication();
 	void dataTransmission();
 	void DHT_main();
-//	void DHT_main_Async(DHT* dht);
-	void Dht_readAsync();
-//	void dhtInit(DHT* dht, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
-//			no need for this init, in the constructor we init everything
-	void Dht_onGpioInterrupt();
 	void printTheTemprature();
-	void returnTheTemprature(int* humidity, int* temp);
-
-	void measureTemp();
+	void Dht_read();
 
 };
 

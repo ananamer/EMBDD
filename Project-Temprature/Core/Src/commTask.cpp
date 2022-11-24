@@ -24,14 +24,9 @@ int cmdprint = 0;
 char first_word[MAX_BUFFER_LENGTH];
 CLI cli;
 
-//int _write(int fd, char* ptr, int len) {
-//    HAL_UART_Transmit(&huart2, (uint8_t *) ptr, len, HAL_MAX_DELAY);
-//    return len;
-//}
-
-
 void commTask()
 {
+	printf("CommTask\r\n");
 	while(1){
 		if(communication()){
 			handleCommand();
@@ -58,7 +53,6 @@ int communication()
 
 	if (ch != '\r' && ch != '\n')
 	{
-		//HAL_UART_Transmit(&huart2, &ch, 1, 0xFFFF);
 		if (cmdcount >= MAX_BUFFER_LENGTH)
 		{
 			cmdcount = 0;
@@ -98,13 +92,6 @@ void handleCommand()
 		}
 	}
 	cli.performCommand((char *)cmdbuffer, param);
-
-//	for (int i = 0; i < commandsCount; i++) {
-//		if (strcmp(container[i].name, (char *)cmdbuffer) == 0) {
-//			container[i].command->doCommand(param);
-//			return;
-//		}
-//	}
 
 
 

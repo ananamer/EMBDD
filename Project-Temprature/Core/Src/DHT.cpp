@@ -13,7 +13,6 @@
 // Definitions
 GPIO_InitTypeDef GPIO_InitStruct = {0};
 int dataBuff[SIZE];
-//uint32_t _time ;
 uint32_t tmp_time;
 int integralRH, decimalRH;
 int integralT, decimalT;
@@ -127,16 +126,55 @@ void DHT::dataTransmission()
 			}
 		}
 		dataBuff[i] = calculateTime(  _time);
-	}//for
+	}
 }
 void DHT::DHT_main()
 {
 	HAL_TIM_Base_Start(&htim7);
 	startCommunication();
 	dataTransmission();
-	measureTemp();
-//	printTheTemprature();
+//	Dht_read();
+	printTheTemprature();
 }
+void DHT::printTheTemprature()
+{
+//  THIS DONE IN THE measureTemp()
+	//-----------------------------
+	integralRH = calculateTemp(0);
+	decimalRH =  calculateTemp(8);
+	integralT = calculateTemp(16);
+	decimalT =  calculateTemp(24);
+	checkSum =  calculateTemp(32);
+	//-----------------------------
+
+
+	printf("Humidity = %d.%d\r\n"
+			 "Temprature  = %d.%d\r\n"
+			, integralRH, decimalRH,
+				integralT, decimalT);
+
+
+	if(checkSum != (integralRH + decimalRH + integralT + decimalT)){
+		printf("CheckSum ERROR !\r\n");
+		printf(	"checkSum = %d \r\n", checkSum);
+	}
+//	printf("\r\n ------------------------------------------------ \r\n");
+}
+void DHT::Dht_read()
+{
+	integralRH = calculateTemp(0);
+	decimalRH =  calculateTemp(8);
+	integralT = calculateTemp(16);
+	decimalT =  calculateTemp(24);
+	checkSum =  calculateTemp(32);
+	temperature = (double)integralT +  (double)decimalT/100 ;
+	printf("integralT = %d\r\n", integralT);
+	printf("decimalT = %d\r\n", decimalT);
+
+	printf("Temp = %f\r\n", temperature);
+}
+
+
 void DHT::setGpioOutput()
 {
 	GPIO_InitTypeDef gpioStruct = {0};
@@ -158,96 +196,4 @@ void DHT::setGpioExti()
 	HAL_GPIO_Init(GPIOx, &gpioStruct);
 	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
-}
-void DHT::Dht_readAsync()
-{
-	setGpioOutput();
-	printf("from Dht_readAsync\r\n");
-	HAL_TIM_Base_Start(&htim7);
-	__HAL_TIM_SET_COUNTER(&htim7, 0);
-
-	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
-	wait(18000);
-	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
-	state = AWAITING_RESPONSE_START;
-	lastFalling = __HAL_TIM_GET_COUNTER(&htim7);
-
-	setGpioExti();
-	// when the DHT fall down to 0 the interrupt will handle
-
-}
-void DHT::Dht_onGpioInterrupt()
-{
-	switch (state) {
-//		case WAKING_UP_SIGNAL:
-//			dht->state = AWAITING_RESPONSE_START;
-//			dht->lastFalling = __HAL_TIM_GET_COUNTER(&htim7);
-//			break;
-		case AWAITING_RESPONSE_START:
-			state = AWAITING_RESPONSE_END;
-			lastFalling = __HAL_TIM_GET_COUNTER(&htim7);
-			break;
-		case AWAITING_RESPONSE_END:
-			state = RECEIVING_BITS;
-			lastFalling = __HAL_TIM_GET_COUNTER(&htim7);
-			break;
-		case RECEIVING_BITS:
-			if(counter <40){
-				tmp_time = __HAL_TIM_GET_COUNTER(&htim7);
-				dataBuff[counter]= calculateTime(tmp_time - lastFalling);
-				counter++ ;
-			}
-			else{
-				state = DATA_RECEIVED;
-			}
-			lastFalling = tmp_time;
-			break;
-
-		case DATA_RECEIVED:
-			printTheTemprature();
-			state = AWAITING_RESPONSE_START;
-			break;
-		default:
-			break;
-	}
-}
-void DHT::returnTheTemprature(int* humidity, int* temp)
-{
-	*humidity = calculateTemp(0);
-	*temp = calculateTemp(16);
-
-}
-void DHT::printTheTemprature()
-{
-//  THIS DONE IN THE measureTemp()
-	//-----------------------------
-//	integralRH = calculateTemp(0);
-//	decimalRH =  calculateTemp(8);
-//	integralT = calculateTemp(16);
-//	decimalT =  calculateTemp(24);
-//	checkSum =  calculateTemp(32);
-	//-----------------------------
-
-
-	printf("Humidity = %d.%d\r\n"
-			 "Temprature  = %d.%d\r\n"
-			, integralRH, decimalRH,
-				integralT, decimalT);
-
-
-	if(checkSum != (integralRH + decimalRH + integralT + decimalT)){
-		printf("CheckSum ERROR !\r\n");
-		printf(	"checkSum = %d \r\n", checkSum);
-	}
-//	printf("\r\n ------------------------------------------------ \r\n");
-}
-
-void DHT::measureTemp()
-{
-	integralRH = calculateTemp(0);
-	decimalRH =  calculateTemp(8);
-	integralT = calculateTemp(16);
-	decimalT =  calculateTemp(24);
-	checkSum =  calculateTemp(32);
-	temperature = (double)integralT +  (double)decimalT/100 ;
 }
