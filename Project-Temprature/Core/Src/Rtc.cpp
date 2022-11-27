@@ -6,6 +6,8 @@
  */
 
 #include "Rtc.h"
+#include "main.h"
+#include <stdio.h>
 
 Rtc::Rtc() {
 	// TODO Auto-generated constructor stub
@@ -59,7 +61,14 @@ void Rtc :: rtcGetTime(DateTime* dateTime)
 	dateTime->month = bcdToInt(buffer[5]);
 	dateTime->year = bcdToInt(buffer[6]);
 }
+void Rtc::printTime(DateTime * dateTime)
+{
+	rtcGetTime(dateTime);
+	printf("%d:%d:%d - %d/%d/%d \n\r", dateTime->hours, dateTime->min, dateTime->sec ,
+									   dateTime->day , dateTime->month  , dateTime->year     );
 
+
+}
 HAL_StatusTypeDef Rtc :: rtcSetTime( DateTime * dateTime)
 {
 	HAL_StatusTypeDef status;

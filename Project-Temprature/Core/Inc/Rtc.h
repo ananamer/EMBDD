@@ -29,6 +29,7 @@ public:
 	void rtcWrite(uint16_t memAddr, uint8_t * buffer, uint16_t size);
 	void rtcRead(uint16_t memAddr, uint8_t * buffer, uint16_t size);
 	void rtcGetTime(DateTime * dateTime);
+	void printTime(DateTime * dateTime);
 	HAL_StatusTypeDef rtcSetTime(DateTime * dateTime);
 	int bcdToInt(uint8_t bcd);
 	int intToBcd(int value, int minVal, int maxVal);

@@ -19,11 +19,17 @@
 #include "Flash.h"
 #include "Rtc.h"
 #include "DateTime.h"
+#include "Manager.h"
+#include "LogRecord.h"
 
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
 extern I2C_HandleTypeDef hi2c1;
+extern CLI cli;
+
+LogRecord Records[MAX_LOG_RECORDS];
+int numOfRecords = 0;
 
 LED redLed(RED_GPIO_Port, RED_Pin, LED_OFF );
 LED bluLed(BLU_GPIO_Port, BLU_Pin, LED_OFF);
@@ -32,9 +38,14 @@ Button btn1(SW1_GPIO_Port, SW1_Pin);
 Button btn2(SW2_GPIO_Port, SW2_Pin);
 DHT dht(DHT11_GPIO_Port, DHT11_Pin);
 Flash Thresholds(2, 0x08080000, 1, FLASH_TYPEPROGRAM_DOUBLEWORD);
+DateTime initTime;
 
-DateTime date_time;
+//--------------------------------
+Manager* Monitor = new Manager(OK);
 Rtc* rtc = new Rtc(&hi2c1, 0xD0);
+DateTime currentTime;
+//--------------------------------
+
 //#define SW1_Pin GPIO_PIN_10
 //#define SW1_GPIO_Port GPIOA
 //#define SW2_Pin GPIO_PIN_5
@@ -43,69 +54,88 @@ Rtc* rtc = new Rtc(&hi2c1, 0xD0);
 //#define DHT11_GPIO_Port GPIOB
 
 
-DateTime initTime;
-
-extern CLI cli;
 
 void my_main()
 {
 
-
-	initTime.hours = 0 ;
-	initTime.min =   0 ;
-	initTime.sec =   0 ;
-	initTime.day =	 1 ;
-	initTime.month = 1 ;
-	initTime.year =  20;
-
-
+//  Initial time -------------
+//	initTime.hours   = 15 ;
+//	initTime.min     = 35 ;
+//	initTime.sec     =  0 ;
+//	initTime.day     = 27 ;
+//	initTime.month   = 11 ;
+//	initTime.year    = 22 ;
+//	initTime.weekDay =  1 ;
+//	rtc->rtcSetTime(&initTime);
+//  --------------------------
 
 	HAL_TIM_Base_Init(&htim6);
 	cli.CliInit();
 	Thresholds.printThresHolds();
-
+	bluLed.LedOn();
 	printf("CHECK from my main\r\n");
 
 }
+
 void dhtTask()
 {
 	dht.DHT_main();
-// this will print the temp every second because its called from the mymain task
+
+}
+
+void mainTask()
+{
+	double currentTemp = dht.getTemp();
+//	printf("\r\nFrom mainTask-temp = %f\r\n", currentTemp);
+
+	if(currentTemp < Thresholds.getWarning() ){
+		if( Monitor->getState() != OK){
+			printf("State = [OK] \r\n");
+			Monitor->setState(OK);
+			bluLed.LedOn();
+			redLed.LedOFF();
+			buz.buzzStop();
+
+		}
+	}
+	else if(currentTemp >= Thresholds.getWarning() &&
+				currentTemp < Thresholds.getCritical() ){
+			if( Monitor->getState() != WARNING   ){
+				printf("State = [WARNING] \r\n");
+				Monitor->setState(WARNING);
+				bluLed.LedOFF();
+				redLed.LedOn();
+				buz.buzzStop();
+			}
+	}
+	else if(currentTemp >= Thresholds.getCritical() ){
+		if( Monitor->getState() != CRITICAL &&
+				Monitor->getState() != CRITICAL_NO_BUZZER   ){
+			printf("State = [CRITICAL] \r\n");
+			Monitor->setState(CRITICAL);
+			redLed.LedBlink();
+			buz.buzzStart();
+		}
+	}
 
 
 }
+
+void LedTask()
+{
+	if(redLed.getState() == LED_BLINK){
+		redLed.LedBlink();
+	}
+}
+
 
 void TimeTask()
 {
 //	print the time each second
-//	rtc.rtcGetTime();
+//	rtc->rtcGetTime(&currentTime);
+//	rtc->printTime(&currentTime);
 //  with os delay 1000
 }
-void HAL_GPIO_EXTI_Callback(uint16_t pin)
-{
-	if (pin == btn1.getPin()){
-		// Buzzer Stop/Start
-		if (HAL_GPIO_ReadPin(btn1.getGpio(), btn1.getPin()) == 0) {
-
-			if(buz.getState() == BUZ_ON){
-				buz.buzzStop();
-			}
-			else if(buz.getState() == BUZ_OFF){
-				buz.buzzStart();
-			}
-		}
-	}
-	else if(pin == btn2.getPin()){
-		if (HAL_GPIO_ReadPin(btn2.getGpio(), btn2.getPin()) == 0) {
-			printf("DHT button\r\n");
-			dht.DHT_main();
-		}
-	}
-}
-
-
-
-
 void measureTemp(void *argument)
 {
 	while(1){
@@ -116,33 +146,91 @@ void measureTemp(void *argument)
 	osDelay(10000);
 }
 
-void LedTask()
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
-//	 TODO ------------------------------------------------------
-	while(1)
-	{
-		if(dht.getTemp() < (double)Thresholds.getWarning()){
-			bluLed.LedOn();
-			redLed.LedOFF();
-			buz.buzzStop();
-		}
-		else {
-			bluLed.LedOFF();
-			if(dht.getTemp() < (double)Thresholds.getCritical() ){
-				redLed.LedOn();
-				buz.buzzStart();
-			}
-			else{
-				redLed.LedBlink();
-				buz.buzzStart();
+	if (pin == btn1.getPin()){
+		// Buzzer Stop/Start
+		if (HAL_GPIO_ReadPin(btn1.getGpio(), btn1.getPin()) == 0) {
+			if(Monitor->getState() == CRITICAL){
+				Monitor->setState(CRITICAL_NO_BUZZER);
+				buz.buzzStop();
 			}
 		}
-		osDelay(1000);
 	}
 }
 
 
 
+
+
+
+//	while(1)
+//	{
+//		double tmp = dht.getTemp();
+//		printf("from LedTask Temp = %f\r\n", tmp);
+//
+//		SYSTEM_STATE currentState =  Monitor->getState();
+//		if(dht.getTemp() < (double)Thresholds.getWarning()){
+//			// state ok
+//			bluLed.LedOn();
+//			redLed.LedOFF();
+//			buz.buzzStop();
+//		}
+//		else {
+//			bluLed.LedOFF();
+//			if(dht.getTemp() < (double)Thresholds.getCritical() ){
+//				// state warning
+//				redLed.LedOn();
+//				buz.buzzStart();
+//			}
+//			else{
+//				redLed.LedBlink();
+//				buz.buzzStart();
+//			}
+//		}
+//		osDelay(1000);
+//	}
+
+
+
+/*
+ * if ( temp<warning)
+ * 		state = ok
+ * else
+ * 		if ( warning =< temp < critical)
+ * 			state = warning
+ *
+ * else
+ * 		if ( temp > critical && btn.state = 0)
+ * 			state = critical
+ * 		if ( temp > critical && btn.state = 1)
+ * 			state = critical_no_buzzer
+ *------------------------------------
+
+ * switch Manager.getState
+ * 		case OK
+ * 				blu.on
+ * 				red.off
+ * 				buz.of
+ * 		case WARNING
+ * 				blu.off
+ * 				red.on
+ * 				buz.of
+ * 				write a logRecord
+ * 		case CRITICAL
+ * 				blu.off
+ * 				red.blink
+ * 				buz.on
+ * 				write a logRecord
+ * 		case CRITICAL_NO_BUZZER
+ * 				blu.off
+ * 				red.blink
+ * 				buz.off
+ *
+ *
+ * */
 
 
 

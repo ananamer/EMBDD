@@ -30,6 +30,7 @@ public:
 	void LedStopBlink();
 
 	LED_STATE getState(){return State;}
+	void setState(LED_STATE _state);
 	GPIO_TypeDef* getGpio(){return GPIOx;}
 	uint16_t getPin(){return GPIO_Pin;}
 };

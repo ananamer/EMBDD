@@ -22,6 +22,8 @@ void monitorInit();
 void LedTask();
 void dhtTask();
 void TimeTask();
+void mainTask();
+
 
 #ifdef __cplusplus
 }

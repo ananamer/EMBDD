@@ -75,7 +75,7 @@ const osThreadAttr_t myTask03_attributes = {
 osThreadId_t myTask04Handle;
 const osThreadAttr_t myTask04_attributes = {
   .name = "myTask04",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for myTask05 */
@@ -83,6 +83,13 @@ osThreadId_t myTask05Handle;
 const osThreadAttr_t myTask05_attributes = {
   .name = "myTask05",
   .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for myTask06 */
+osThreadId_t myTask06Handle;
+const osThreadAttr_t myTask06_attributes = {
+  .name = "myTask06",
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -102,6 +109,7 @@ void StartTask02(void *argument);
 void StartTask03(void *argument);
 void StartTask04(void *argument);
 void StartTask05(void *argument);
+void StartTask06(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -202,6 +210,9 @@ int main(void)
 
   /* creation of myTask05 */
   myTask05Handle = osThreadNew(StartTask05, NULL, &myTask05_attributes);
+
+  /* creation of myTask06 */
+  myTask06Handle = osThreadNew(StartTask06, NULL, &myTask06_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -499,7 +510,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, BLU_Pin|RED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, RED_Pin|BLU_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -507,12 +518,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : BLU_Pin RED_Pin */
-  GPIO_InitStruct.Pin = BLU_Pin|RED_Pin;
+  /*Configure GPIO pins : RED_Pin BLU_Pin */
+  GPIO_InitStruct.Pin = RED_Pin|BLU_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SW1_Pin */
   GPIO_InitStruct.Pin = SW1_Pin;
@@ -578,7 +589,13 @@ __weak void StartTask02(void *argument)
   /* USER CODE BEGIN StartTask02 */
   /* Infinite loop */
 
-	// $$$$ THIS IS [ communication Task ]
+/*
+ * ------------------------------------------
+ * This task take care of communication with the
+ * 		input from keyboard
+ * ------------------------------------------
+ * */
+
   for(;;)
   {
 //	printf("FROM TASK 2\r\n");
@@ -601,7 +618,12 @@ __weak void StartTask03(void *argument)
 {
   /* USER CODE BEGIN StartTask03 */
   /* Infinite loop */
-	// $$$$ THIS IS [ temperature measuring task ]
+/*
+ * ------------------------------------------
+ * In this task the temperature been measured
+ * 		every 1 second and stored in the dht.temperature
+ * ------------------------------------------
+ * */
   for(;;)
   {
 	 dhtTask();
@@ -621,11 +643,18 @@ __weak void StartTask04(void *argument)
 {
   /* USER CODE BEGIN StartTask04 */
   /* Infinite loop */
-	// $$$$ THIS IS [ LED Task ]
+/*
+ * ------------------------------------------
+ *	This task takes care of the led blinking.
+ *		checks every 100 ms what is the leds state
+ *		and if it blink state -> toggle pin.
+ * ------------------------------------------
+ * */
+
   for(;;)
   {
 	LedTask();
-    osDelay(1);
+    osDelay(100);
   }
   /* USER CODE END StartTask04 */
 }
@@ -641,12 +670,49 @@ __weak void StartTask05(void *argument)
 {
   /* USER CODE BEGIN StartTask05 */
   /* Infinite loop */
+/*
+ * ------------------------------------------
+ * This task gets the time from the rtc every 1 second
+ * 		and stores it in
+ * 			[ MyMain.cpp > DateTime CurrentTime ]
+ *
+ * ------------------------------------------
+ * */
+
   for(;;)
   {
-	TimeTask();
-    osDelay(1);
+//	TimeTask();
+//    osDelay(1000);
   }
   /* USER CODE END StartTask05 */
+}
+
+/* USER CODE BEGIN Header_StartTask06 */
+/**
+* @brief Function implementing the myTask06 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask06 */
+void StartTask06(void *argument)
+{
+  /* USER CODE BEGIN StartTask06 */
+  /* Infinite loop */
+/*
+ * ------------------------------------------
+ * This task gets the temp from the dht every 1 second
+ * 		and change the
+ * 					  blue led/ red led
+ * 					  buzzer
+ * 					  monitor states
+ * ------------------------------------------
+ * */
+  for(;;)
+  {
+	mainTask();
+    osDelay(1000);
+  }
+  /* USER CODE END StartTask06 */
 }
 
 /**

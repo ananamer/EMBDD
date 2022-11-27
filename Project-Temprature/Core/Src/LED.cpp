@@ -23,6 +23,11 @@ LED::LED(GPIO_TypeDef* gpiox, uint16_t gpio_pin, LED_STATE state){
 	State = state;
 }
 
+void LED::setState(LED_STATE _state)
+{
+	State = _state;
+}
+
 void LED::LedOn()
 {
 	State = LED_ON;

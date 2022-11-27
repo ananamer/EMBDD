@@ -133,8 +133,8 @@ void DHT::DHT_main()
 	HAL_TIM_Base_Start(&htim7);
 	startCommunication();
 	dataTransmission();
-//	Dht_read();
-	printTheTemprature();
+	Dht_read();
+//	printTheTemprature();
 }
 void DHT::printTheTemprature()
 {
@@ -168,10 +168,12 @@ void DHT::Dht_read()
 	decimalT =  calculateTemp(24);
 	checkSum =  calculateTemp(32);
 	temperature = (double)integralT +  (double)decimalT/100 ;
-	printf("integralT = %d\r\n", integralT);
-	printf("decimalT = %d\r\n", decimalT);
 
-	printf("Temp = %f\r\n", temperature);
+
+//	printf("integralT = %d\r\n", integralT);
+//	printf("decimalT = %d\r\n", decimalT);
+//	printf("Temp = %f\r\n", temperature);
+
 }
 
 

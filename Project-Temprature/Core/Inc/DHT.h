@@ -31,10 +31,13 @@ private:
 	uint32_t lastFalling;
 	double temperature;
 
+
 	void setGpioOutput();
 	void setGpioExti();
 
 public:
+
+
 	DHT();
 	virtual ~DHT();
 	DHT(GPIO_TypeDef* gpiox, uint16_t gpio_pin);
@@ -55,6 +58,7 @@ public:
 	void DHT_main();
 	void printTheTemprature();
 	void Dht_read();
+
 
 };
 
