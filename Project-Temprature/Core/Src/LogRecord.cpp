@@ -8,6 +8,13 @@
 #include "LogRecord.h"
 #include <cstring>
 #include <stdio.h>
+#include <string.h>
+#include "main.h"
+#include "Rtc.h"
+
+extern Rtc* rtc;
+extern LogRecord Records[MAX_LOG_RECORDS];
+extern int numOfRecords ;
 
 LogRecord::LogRecord() {
 	// TODO Auto-generated constructor stub
@@ -17,16 +24,23 @@ LogRecord::LogRecord() {
 LogRecord::~LogRecord() {
 	// TODO Auto-generated destructor stub
 }
-
-void LogRecord::writeToRecords(LogRecord Records[], LogRecord record, int numOfRecords)
+LogRecord::LogRecord(int type, double _temperature)
 {
-	if(numOfRecords < MAX_LOG_RECORDS-1){
-		Records[numOfRecords] = record;
-		numOfRecords++;
+	if(type == 1){
+		strcpy(Message, warningMsg);
+	}
+	else if(type == 2){
+		strcpy(Message, criticalMsg);
 	}
 	else{
-		printf("Out of Memory! Please clear the Log Records\r\n");
+		printf("Error Record!\r\n");
+		return;
 	}
+
+	Temperature = _temperature;
+	rtc->rtcGetTime(&Time);
+
+
 }
 
 void LogRecord::printRecords(LogRecord Records[], int numOfRecords)
@@ -48,4 +62,32 @@ void LogRecord::clearRecords(LogRecord Records[], int numOfRecords)
 
 	}
 }
-
+//
+//void LogRecord::warningRecrod(double temperature)
+//{
+//
+//	/*
+//	 * warning time = get time from the rtc
+//	 * temp = the temp passed in the function
+//	 * message is strcpy with the defined warning msg
+//	 * */
+//
+//	LogRecord Warning;
+//	Warning.Temperature = temperature;
+//	rtc->rtcGetTime(&Warning.Time);
+//	strcpy(Warning.Message, warningMsg);
+//
+//	writeToRecords(Warning);)
+//}
+//
+//void LogRecord::criticalRecrod(double temperature)
+//{
+//	LogRecord newCritical;
+//	newCritical.Temperature = temperature;
+//	rtc->rtcGetTime(&newCritical.Time);
+//	strcpy(newCritical.Message, criticalMsg);
+//
+////	writeToRecords(Records, newCritical);
+//
+//
+//}

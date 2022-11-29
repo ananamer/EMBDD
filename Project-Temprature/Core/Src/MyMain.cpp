@@ -82,7 +82,20 @@ void dhtTask()
 	dht.DHT_main();
 
 }
+void writeToRecords(LogRecord record)
+{
+	// type 1 = warning
+	// type 2 = critical
 
+	if(numOfRecords < MAX_LOG_RECORDS-1){
+
+		Records[numOfRecords] = record;
+		numOfRecords++;
+	}
+	else{
+		printf("Out of Memory! Please clear the Log Records\r\n");
+	}
+}
 void mainTask()
 {
 	double currentTemp = dht.getTemp();
@@ -90,6 +103,11 @@ void mainTask()
 
 	if(currentTemp < Thresholds.getWarning() ){
 		if( Monitor->getState() != OK){
+			/* Transition to [OK] State:
+			 * 		Blue led on, Red led off
+			 * 		Buzzer off
+			 * 		no need to write to log
+			 */
 			printf("State = [OK] \r\n");
 			Monitor->setState(OK);
 			bluLed.LedOn();
@@ -101,25 +119,46 @@ void mainTask()
 	else if(currentTemp >= Thresholds.getWarning() &&
 				currentTemp < Thresholds.getCritical() ){
 			if( Monitor->getState() != WARNING   ){
+				/* Transition to [WARNING] State:
+				 * 		Blue led off, Red led on
+				 * 		Buzzer off
+				 * 		Write to log warning record
+				 */
 				printf("State = [WARNING] \r\n");
 				Monitor->setState(WARNING);
 				bluLed.LedOFF();
 				redLed.LedOn();
 				buz.buzzStop();
+//				 * 		Write to log warning record
+				LogRecord warningRec(1, currentTemp);
+				writeToRecords(warningRec);
+
+
 			}
 	}
 	else if(currentTemp >= Thresholds.getCritical() ){
-		if( Monitor->getState() != CRITICAL &&
-				Monitor->getState() != CRITICAL_NO_BUZZER   ){
-			printf("State = [CRITICAL] \r\n");
-			Monitor->setState(CRITICAL);
-			redLed.LedBlink();
-			buz.buzzStart();
-		}
+			if( Monitor->getState() != CRITICAL &&
+					Monitor->getState() != CRITICAL_NO_BUZZER   ){
+				/* Transition to [CRITICAL] State:
+				 * 		Red led blink
+				 * 		Buzzer on
+				 * 		Write to log critical record
+				 */
+
+				printf("State = [CRITICAL] \r\n");
+				Monitor->setState(CRITICAL);
+				redLed.LedBlink();
+				buz.buzzStart();
+//				 * 		Write to log critical record
+				LogRecord criticalRec(1, currentTemp);
+				writeToRecords(criticalRec);
+			}
 	}
 
 
 }
+
+
 
 void LedTask()
 {
