@@ -4,7 +4,6 @@
  *  Created on: Nov 17, 2022
  *      Author: student
  */
-
 #include "MyMain.h"
 #include "CliCommand.h"
 #include "main.h"
@@ -20,16 +19,19 @@
 #include "Rtc.h"
 #include "DateTime.h"
 #include "Manager.h"
-#include "LogRecord.h"
+#include <stdlib.h>
+#include <string.h>
 
+// Extern
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
 extern I2C_HandleTypeDef hi2c1;
 extern CLI cli;
 
-LogRecord Records[MAX_LOG_RECORDS];
 int numOfRecords = 0;
+char RecordsArr[MAX_RECORDS][LEN_RECORD];
+
 
 LED redLed(RED_GPIO_Port, RED_Pin, LED_OFF );
 LED bluLed(BLU_GPIO_Port, BLU_Pin, LED_OFF);
@@ -43,16 +45,7 @@ DateTime initTime;
 //--------------------------------
 Manager* Monitor = new Manager(OK);
 Rtc* rtc = new Rtc(&hi2c1, 0xD0);
-DateTime currentTime;
 //--------------------------------
-
-//#define SW1_Pin GPIO_PIN_10
-//#define SW1_GPIO_Port GPIOA
-//#define SW2_Pin GPIO_PIN_5
-//#define SW2_GPIO_Port GPIO
-//#define DHT11_Pin GPIO_PIN_5
-//#define DHT11_GPIO_Port GPIOB
-
 
 
 void my_main()
@@ -82,20 +75,20 @@ void dhtTask()
 	dht.DHT_main();
 
 }
-void writeToRecords(LogRecord record)
-{
-	// type 1 = warning
-	// type 2 = critical
-
-	if(numOfRecords < MAX_LOG_RECORDS-1){
-
-		Records[numOfRecords] = record;
-		numOfRecords++;
-	}
-	else{
-		printf("Out of Memory! Please clear the Log Records\r\n");
-	}
-}
+//void writeToRecords(LogRecord record)
+//{
+//	// type 1 = warning
+//	// type 2 = critical
+//
+//	if(numOfRecords < MAX_LOG_RECORDS-1){
+//
+//		Records[numOfRecords] = record;
+//		numOfRecords++;
+//	}
+//	else{
+//		printf("Out of Memory! Please clear the Log Records\r\n");
+//	}
+//}
 void mainTask()
 {
 	double currentTemp = dht.getTemp();
@@ -130,10 +123,22 @@ void mainTask()
 				redLed.LedOn();
 				buz.buzzStop();
 //				 * 		Write to log warning record
-				LogRecord warningRec(1, currentTemp);
-				writeToRecords(warningRec);
 
-
+				char warningRecord[LEN_RECORD];
+				DateTime warningTime;
+				rtc->rtcGetTime(&warningTime);
+//				*		Create the warning message
+				sprintf(warningRecord, "Warning! [%.2f] | %d:%d:%d - %d/%d/%d", currentTemp,
+										warningTime.hours, warningTime.min    , warningTime.sec ,
+										warningTime.day  , warningTime.month  , warningTime.year );
+//				*		Writing the record to the RecordsArray
+				if(numOfRecords < MAX_RECORDS-1){
+					strcpy(RecordsArr[numOfRecords], warningRecord);
+					numOfRecords++;
+				}
+				else{
+					printf("Error! Out Of Memory- Please clear the log!\r\n");
+				}
 			}
 	}
 	else if(currentTemp >= Thresholds.getCritical() ){
@@ -150,8 +155,23 @@ void mainTask()
 				redLed.LedBlink();
 				buz.buzzStart();
 //				 * 		Write to log critical record
-				LogRecord criticalRec(1, currentTemp);
-				writeToRecords(criticalRec);
+
+				char criticalRecord[LEN_RECORD];
+				DateTime criticalTime;
+				rtc->rtcGetTime(&criticalTime);
+//				*		Create the warning message
+				sprintf(criticalRecord, "Critical! [%.2f] | %d:%d:%d - %d/%d/%d", currentTemp,
+										 criticalTime.hours, criticalTime.min    , criticalTime.sec ,
+										 criticalTime.day  , criticalTime.month  , criticalTime.year );
+//				*		Writing the record to the RecordsArray
+				if(numOfRecords < MAX_RECORDS-1){
+					strcpy(RecordsArr[numOfRecords], criticalRecord);
+					numOfRecords++;
+					}
+				else{
+					printf("Error! Out Of Memory- Please clear the log!\r\n");
+				}
+
 			}
 	}
 
@@ -168,13 +188,7 @@ void LedTask()
 }
 
 
-void TimeTask()
-{
-//	print the time each second
-//	rtc->rtcGetTime(&currentTime);
-//	rtc->printTime(&currentTime);
-//  with os delay 1000
-}
+
 void measureTemp(void *argument)
 {
 	while(1){

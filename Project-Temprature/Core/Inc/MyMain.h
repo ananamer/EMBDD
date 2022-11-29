@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include "main.h"
 
+#define MAX_RECORDS 50
+#define LEN_RECORD 100
+
 #ifdef __cplusplus
 extern "C" {
 #endif

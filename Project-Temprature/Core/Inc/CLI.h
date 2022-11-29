@@ -32,6 +32,7 @@ public:
 	void performCommand(char* cmd, char* param);
 	void printCommands();
 
+
 };
 
 #endif /* SRC_CLI_H_ */

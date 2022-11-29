@@ -21,6 +21,10 @@ extern LED bluLed;
 extern BUZ buz;
 extern DHT dht;
 extern Flash Thresholds;
+
+extern char RecordsArr[50][100];
+
+extern int numOfRecords;
 int myGlobalVariable = 0;
 
 CLI::CLI() {
@@ -60,6 +64,7 @@ public:
 		_led->LedOn();
 	}
 };
+
 class LedOffCmd : public CliCommand
 {
 	LED * _led;
@@ -133,6 +138,45 @@ public:
 	}
 };
 
+void printRecords()
+{
+	if(numOfRecords > 0){
+		printf("Records array[#%d]:\r\n", numOfRecords);
+		for(int i=0; i<numOfRecords; i++){
+			printf("%d-\t%s\r\n", i+1, RecordsArr[i]);
+		}
+	}
+	else{
+		printf("The RecordsArray is empty !\r\n");
+	}
+}
+class PrintLogCmd: public CliCommand
+{
+public:
+	void doCommand(const char* param) {
+		printRecords();
+	}
+};
+
+void clearRecords()
+{
+	if(numOfRecords > 0){
+		for(int i=0; i<numOfRecords; i++){
+			strcpy(RecordsArr[numOfRecords], "0");
+			numOfRecords--;
+		}
+	}
+	else{
+		printf("The RecordsArray is empty !\r\n");
+	}
+}
+class ClearLogCmd: public CliCommand
+{
+public:
+	void doCommand(const char* param) {
+		clearRecords();
+	}
+};
 // HelpCmd will print the commands in the CLI
 class HelpCmd : public CliCommand
 {
@@ -173,6 +217,7 @@ void CLI::printCommands()
 
 
 
+
 void CLI::CliInit()
 {
 
@@ -188,6 +233,9 @@ void CLI::CliInit()
 	registerCommand("setW", new SetWarningCmd(&Thresholds));
 	registerCommand("setC", new SetCriticalCmd(&Thresholds));
 	registerCommand("thresholds", new PrintThresholdsCmd(&Thresholds));
+
+	registerCommand("printLog", new PrintLogCmd());
+	registerCommand("clearLog", new ClearLogCmd());
 
 	registerCommand("help", new HelpCmd(this));
 
