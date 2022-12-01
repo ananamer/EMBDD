@@ -95,6 +95,13 @@ const osThreadAttr_t myTask06_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for myTask07 */
+osThreadId_t myTask07Handle;
+const osThreadAttr_t myTask07_attributes = {
+  .name = "myTask07",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -114,6 +121,7 @@ void StartTask03(void *argument);
 void StartTask04(void *argument);
 void StartTask05(void *argument);
 void StartTask06(void *argument);
+void StartTask07(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -219,6 +227,9 @@ int main(void)
 
   /* creation of myTask06 */
   myTask06Handle = osThreadNew(StartTask06, NULL, &myTask06_attributes);
+
+  /* creation of myTask07 */
+  myTask07Handle = osThreadNew(StartTask07, NULL, &myTask07_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -769,6 +780,25 @@ void StartTask06(void *argument)
     osDelay(1000);
   }
   /* USER CODE END StartTask06 */
+}
+
+/* USER CODE BEGIN Header_StartTask07 */
+/**
+* @brief Function implementing the myTask07 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask07 */
+void StartTask07(void *argument)
+{
+  /* USER CODE BEGIN StartTask07 */
+  /* Infinite loop */
+  for(;;)
+  {
+	  LogWriteTask();
+    osDelay(1);
+  }
+  /* USER CODE END StartTask07 */
 }
 
 /**

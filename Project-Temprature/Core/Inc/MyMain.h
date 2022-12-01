@@ -26,7 +26,7 @@ void LedTask();
 void dhtTask();
 void TimeTask();
 void mainTask();
-
+void LogWriteTask();
 
 #ifdef __cplusplus
 }

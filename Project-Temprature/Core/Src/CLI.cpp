@@ -14,6 +14,7 @@
 #include "BUZ.h"
 #include "DHT.h"
 #include "Flash.h"
+#include "SdCard.h"
 #include <stdlib.h>
 
 extern LED redLed;
@@ -21,7 +22,7 @@ extern LED bluLed;
 extern BUZ buz;
 extern DHT dht;
 extern Flash Thresholds;
-
+extern SdCard* LogSdCard;
 extern char RecordsArr[50][100];
 
 extern int numOfRecords;
@@ -154,7 +155,8 @@ class PrintLogCmd: public CliCommand
 {
 public:
 	void doCommand(const char* param) {
-		printRecords();
+//		printRecords();
+		LogSdCard->print("Log.txt");
 	}
 };
 
@@ -174,7 +176,8 @@ class ClearLogCmd: public CliCommand
 {
 public:
 	void doCommand(const char* param) {
-		clearRecords();
+//		clearRecords();
+		LogSdCard->clear("Log.txt");
 	}
 };
 // HelpCmd will print the commands in the CLI

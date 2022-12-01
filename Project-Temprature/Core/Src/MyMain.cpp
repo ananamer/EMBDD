@@ -21,6 +21,8 @@
 #include "Manager.h"
 #include <stdlib.h>
 #include <string.h>
+#include "SdCard.h"
+
 
 // Extern
 extern TIM_HandleTypeDef htim3;
@@ -28,6 +30,7 @@ extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
 extern I2C_HandleTypeDef hi2c1;
 extern CLI cli;
+
 
 int numOfRecords = 0;
 char RecordsArr[MAX_RECORDS][LEN_RECORD];
@@ -43,13 +46,45 @@ Flash Thresholds(2, 0x08080000, 1, FLASH_TYPEPROGRAM_DOUBLEWORD);
 DateTime initTime;
 
 //--------------------------------
-Manager* Monitor = new Manager(OK);
-Rtc* rtc = new Rtc(&hi2c1, 0xD0);
+Manager* Monitor;
+Rtc* rtc;
+SdCard* LogSdCard;
+char logBuffer[100];
+
 //--------------------------------
 
+void updateLogBuffer()
+{
+	DateTime dateTime;
+	rtc->rtcGetTime(&dateTime);
+	double currentTemp = dht.getTemp();
+	SYSTEM_STATE monitorState = Monitor->getState() ;
+	memset(logBuffer, 0, sizeof(logBuffer));
+	if( monitorState == OK   ){
+		sprintf(logBuffer, "OK! [%.2f] | %d:%d:%d - %d/%d/%d", currentTemp,
+					dateTime.hours, dateTime.min    , dateTime.sec ,
+					dateTime.day  , dateTime.month  , dateTime.year );
+	}
+	else if(monitorState == WARNING   ){
+		sprintf(logBuffer, "Warning! [%.2f] | %d:%d:%d - %d/%d/%d", currentTemp,
+					dateTime.hours, dateTime.min    , dateTime.sec ,
+					dateTime.day  , dateTime.month  , dateTime.year );
 
+	}
+	else if(monitorState == CRITICAL){
+		sprintf(logBuffer, "Critical! [%.2f] | %d:%d:%d - %d/%d/%d", currentTemp,
+					dateTime.hours, dateTime.min    , dateTime.sec ,
+					dateTime.day  , dateTime.month  , dateTime.year );
+
+	}
+
+
+}
 void my_main()
 {
+	Monitor = new Manager(OK);
+	rtc = new Rtc(&hi2c1, 0xD0);
+	LogSdCard = new SdCard("Log.txt", "ErrorLog.txt");
 
 //  Initial time -------------
 //	initTime.hours   = 15 ;
@@ -75,20 +110,7 @@ void dhtTask()
 	dht.DHT_main();
 
 }
-//void writeToRecords(LogRecord record)
-//{
-//	// type 1 = warning
-//	// type 2 = critical
-//
-//	if(numOfRecords < MAX_LOG_RECORDS-1){
-//
-//		Records[numOfRecords] = record;
-//		numOfRecords++;
-//	}
-//	else{
-//		printf("Out of Memory! Please clear the Log Records\r\n");
-//	}
-//}
+
 void mainTask()
 {
 	double currentTemp = dht.getTemp();
@@ -132,14 +154,24 @@ void mainTask()
 										warningTime.hours, warningTime.min    , warningTime.sec ,
 										warningTime.day  , warningTime.month  , warningTime.year );
 //				*		Writing the record to the RecordsArray
-				if(numOfRecords < MAX_RECORDS-1){
+//				*** WRITE TO SD *********************************************************************************
+					updateLogBuffer();
+					LogSdCard->write(LogSdCard->getErrorFileName(), logBuffer);
+
+//				*** WRITE TO SD *********************************************************************************
+
+				/*			Writing to the RecordsArr
+ *
+ *				if(numOfRecords < MAX_RECORDS-1){
 					strcpy(RecordsArr[numOfRecords], warningRecord);
 					numOfRecords++;
 				}
 				else{
 					printf("Error! Out Of Memory- Please clear the log!\r\n");
 				}
+*/
 			}
+
 	}
 	else if(currentTemp >= Thresholds.getCritical() ){
 			if( Monitor->getState() != CRITICAL &&
@@ -164,21 +196,44 @@ void mainTask()
 										 criticalTime.hours, criticalTime.min    , criticalTime.sec ,
 										 criticalTime.day  , criticalTime.month  , criticalTime.year );
 //				*		Writing the record to the RecordsArray
-				if(numOfRecords < MAX_RECORDS-1){
+//				*** WRITE TO SD *********************************************************************************
+				updateLogBuffer();
+				LogSdCard->write(LogSdCard->getErrorFileName(), logBuffer);
+
+//				*** WRITE TO SD *********************************************************************************
+
+/*			Writing to the RecordsArr
+ *
+ * 					if(numOfRecords < MAX_RECORDS-1){
 					strcpy(RecordsArr[numOfRecords], criticalRecord);
 					numOfRecords++;
 					}
 				else{
 					printf("Error! Out Of Memory- Please clear the log!\r\n");
 				}
-
+*/
 			}
+
 	}
 
 
 }
+//				*** WRITE TO SD *********************************************************************************
+//				updateLogBuffer();
+//				logSdCard->write(LogSdCard->getErrorFileName(), logBuffer);
+//				*** WRITE TO SD *********************************************************************************
 
 
+void LogWriteTask()
+{
+	osDelay(1000);
+//	LogSdCard->mount();
+	while(1){
+		updateLogBuffer();
+		LogSdCard->write(LogSdCard->getFileName(), logBuffer);
+		osDelay(60000);
+	}
+}
 
 void LedTask()
 {
